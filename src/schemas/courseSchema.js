@@ -1,11 +1,5 @@
 const { z } = require('zod');
 
-const courseInstructorSchema = z.object({
-  name: z.string().optional(),
-  role: z.string().optional(),
-  bio: z.string().optional(),
-});
-
 const courseCurriculumItemSchema = z.object({
   title: z.string(),
   dur: z.string().optional(),
@@ -17,7 +11,6 @@ const courseOutlineSchema = z.object({
   outcomes: z.array(z.string()).optional(),
   tools: z.array(z.string()).optional(),
   whoFor: z.string().optional(),
-  instructor: courseInstructorSchema.optional(),
   curriculum: z.array(courseCurriculumItemSchema).optional(),
 });
 

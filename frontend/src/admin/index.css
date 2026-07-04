@@ -9,12 +9,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 .admin-scope {
-  --color-primary: #1c1917;
+  --color-primary: #14213d;
   --color-secondary: #78716c;
   --color-accent: #f59e0b;
   --color-accent-hover: #d97706;
   --color-bg: #fafaf9;
-  --color-text: #1c1917;
+  --color-text: #14213d;
   --color-primary-tint: #f2efec;
   --color-card-border: #e4dfd8;
   --color-surface: #f3eee7;
@@ -53,7 +53,7 @@
   width: 100%; max-width: 380px;
   border-radius: 16px;
   padding: 40px 36px;
-  box-shadow: 0 30px 60px -20px rgba(28, 25, 23, 0.5);
+  box-shadow: 0 30px 60px -20px rgba(20, 33, 61, 0.5);
 }
 .admin-scope .login-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 26px; }
 .admin-scope .login-brand .mark {
@@ -61,6 +61,7 @@
   display: flex; align-items: center; justify-content: center; font-weight: 700; color: var(--color-primary);
 }
 .admin-scope .login-brand span { font-weight: 700; font-size: 17px; }
+.admin-scope .login-logo { height: 36px; width: auto; display: block; }
 .admin-scope .login-card h1 { font-size: 21px; margin-bottom: 6px; }
 .admin-scope .login-card > p { font-size: 13.5px; margin-bottom: 26px; }
 .admin-scope .field { margin-bottom: 16px; }
@@ -98,6 +99,7 @@
   display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px;
 }
 .admin-scope .sidebar-brand span { font-weight: 700; font-size: 15px; }
+.admin-scope .sidebar-logo { height: 30px; width: auto; display: block; }
 .admin-scope .sidebar-nav { flex: 1; padding: 14px 10px; overflow-y: auto; }
 .admin-scope .sidebar-nav button {
   width: 100%; text-align: left; background: none; border: none; color: rgba(255,255,255,0.72);
@@ -110,7 +112,7 @@
 }
 .admin-scope .sidebar-nav button:hover { background: rgba(255,255,255,0.08); color: var(--color-white); }
 .admin-scope .sidebar-nav button.active { background: var(--color-accent); color: var(--color-primary); }
-.admin-scope .sidebar-nav button.active .tag { background: rgba(28,25,23,0.15); color: var(--color-primary); }
+.admin-scope .sidebar-nav button.active .tag { background: rgba(20,33,61,0.15); color: var(--color-primary); }
 .admin-scope .sidebar-foot { padding: 16px 20px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 13px; }
 .admin-scope .sidebar-foot .who { font-weight: 600; margin-bottom: 8px; }
 .admin-scope .logout-btn { background: none; border: 1px solid rgba(255,255,255,0.3); color: var(--color-white); padding: 7px 12px; border-radius: 7px; font-size: 12.5px; width: 100%; }
@@ -170,7 +172,7 @@
 
 /* ---------- Modal form ---------- */
 .admin-scope .overlay {
-  position: fixed; inset: 0; background: rgba(28,25,23,0.55);
+  position: fixed; inset: 0; background: rgba(20,33,61,0.55);
   display: flex; align-items: flex-start; justify-content: center; padding: 40px 20px; overflow-y: auto; z-index: 100;
 }
 .admin-scope .modal { background: var(--color-white); border-radius: 14px; width: 100%; max-width: 560px; padding: 30px 32px; }

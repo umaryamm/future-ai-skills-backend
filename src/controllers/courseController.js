@@ -70,7 +70,7 @@ exports.getCourseBySlug = asyncHandler(async (req, res) => {
 // ------------------------------------------------------------
 exports.createCourse = asyncHandler(async (req, res) => {
   const { courseOutline, ...rest } = req.body;
-  const slug = slugify(req.body.title);
+  const slug = rest.slug && rest.slug.trim() ? slugify(rest.slug) : slugify(req.body.title);
 
   const course = await prisma.course.create({
     data: {

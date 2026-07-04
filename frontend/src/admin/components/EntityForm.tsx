@@ -9,17 +9,6 @@ interface Props {
   onCancel: () => void;
 }
 
-// ---- generic line-based list helpers (used for outcomes / tools) ----
-function listToText(list: string[] | undefined): string {
-  return (list || []).join("\n");
-}
-function textToList(text: string): string[] {
-  return text
-    .split("\n")
-    .map((l) => l.trim())
-    .filter(Boolean);
-}
-
 // ---- curriculum helpers: Title | Duration | Body per line ----
 interface CurriculumItem {
   title: string;
@@ -45,29 +34,8 @@ function initialValues(fields: FieldConfig[], record: AnyRecord | null): Record<
   const outline = record?.courseOutline || {};
 
   fields.forEach((f) => {
-    if (f.special === "list") {
-      // outcomes / tools live inside courseOutline on the real record
-      values[f.name] = listToText(outline[f.name] ?? record?.[f.name]);
-      return;
-    }
     if (f.special === "curriculum") {
-      values[f.name] = curriculumToText(outline.curriculum ?? record?.curriculum);
-      return;
-    }
-    if (f.name === "instructor_name") {
-      values[f.name] = outline.instructor?.name ?? "";
-      return;
-    }
-    if (f.name === "instructor_role") {
-      values[f.name] = outline.instructor?.role ?? "";
-      return;
-    }
-    if (f.name === "instructor_bio") {
-      values[f.name] = outline.instructor?.bio ?? "";
-      return;
-    }
-    if (f.name === "intro" || f.name === "whoFor") {
-      values[f.name] = outline[f.name] ?? record?.[f.name] ?? "";
+      values[f.name] = curriculumToText(outline.curriculum);
       return;
     }
 
@@ -91,20 +59,10 @@ export default function EntityForm({ entity, record, onSubmit, onCancel }: Props
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const data: Record<string, any> = {};
-    const outlineFieldNames = new Set([
-      "intro",
-      "outcomes",
-      "tools",
-      "whoFor",
-      "instructor_name",
-      "instructor_role",
-      "instructor_bio",
-      "curriculum",
-    ]);
-    const hasOutlineFields = entity.fields.some((f) => outlineFieldNames.has(f.name));
+    const hasCurriculumField = entity.fields.some((f) => f.special === "curriculum");
 
     entity.fields.forEach((f) => {
-      if (outlineFieldNames.has(f.name)) return; // handled separately below
+      if (f.special === "curriculum") return; // handled separately below
       if (f.type === "number") {
         const v = values[f.name];
         data[f.name] = v === "" || v === null || v === undefined ? null : Number(v);
@@ -113,18 +71,10 @@ export default function EntityForm({ entity, record, onSubmit, onCancel }: Props
       }
     });
 
-    if (hasOutlineFields) {
+    if (hasCurriculumField) {
+      const curriculumFieldName = entity.fields.find((f) => f.special === "curriculum")!.name;
       data.courseOutline = {
-        intro: values.intro || "",
-        outcomes: textToList(values.outcomes || ""),
-        tools: textToList(values.tools || ""),
-        whoFor: values.whoFor || "",
-        instructor: {
-          name: values.instructor_name || "",
-          role: values.instructor_role || "",
-          bio: values.instructor_bio || "",
-        },
-        curriculum: textToCurriculum(values.curriculum || ""),
+        curriculum: textToCurriculum(values[curriculumFieldName] || ""),
       };
     }
 
@@ -188,6 +138,16 @@ function FieldInput({ field, value, onChange }: { field: FieldConfig; value: any
             <option key={opt} value={opt}>{opt}</option>
           ))}
         </select>
+      </div>
+    );
+  }
+
+  if (field.type === "file") {
+    return (
+      <div className="field">
+        <label>{field.label}</label>
+        <input type="file" onChange={() => onChange(value)} />
+        {field.hint && <small className="field-hint">{field.hint}</small>}
       </div>
     );
   }

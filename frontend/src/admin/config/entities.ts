@@ -1,14 +1,6 @@
 import type { ManagedTable } from "../types";
 
-/* ============================================================
-   ENTITY CONFIG
-   One object per manageable table. Add a field here and it
-   shows up in the Add/Edit form automatically; add a column and
-   it shows up in the table automatically. This is the only file
-   you touch to change what the admin panel manages.
-   ============================================================ */
-
-export type FieldType = "text" | "textarea" | "number" | "date" | "checkbox" | "select";
+export type FieldType = "text" | "textarea" | "number" | "date" | "checkbox" | "select" | "file";
 
 export interface FieldConfig {
   name: string;
@@ -20,7 +12,6 @@ export interface FieldConfig {
   rows?: number;
   step?: string;
   options?: string[];
-  /** custom line-based editors for sub-structures */
   special?: "modules" | "faqs" | "list" | "curriculum";
 }
 
@@ -78,21 +69,12 @@ export const ENTITIES: Record<string, EntityConfig> = {
     ],
     fields: [
       { name: "title", label: "Course Title", type: "text", required: true },
+      { name: "slug", label: "Slug", type: "text", required: true, hint: "e.g. video-editing-mastery — leave blank to auto-generate from title" },
       { name: "category", label: "Category", type: "text", required: true },
       { name: "duration", label: "Duration", type: "text", required: true, hint: "e.g. 3 Months or 12 Weeks" },
       { name: "thumbnailImage", label: "Cover Image URL", type: "text" },
       { name: "description", label: "Description", type: "textarea" },
-
-      // --- everything below gets packaged into courseOutline by EntityForm ---
-      { name: "intro", label: "Intro", type: "textarea", hint: "Shown at the top of the course detail page." },
-      { name: "outcomes", label: "Outcomes", type: "textarea", special: "list", hint: "One outcome per line." },
-      { name: "tools", label: "Tools / Tech Covered", type: "textarea", special: "list", hint: "One tool per line." },
-      { name: "whoFor", label: "Who This Course Is For", type: "textarea" },
-      { name: "instructor_name", label: "Instructor Name", type: "text" },
-      { name: "instructor_role", label: "Instructor Role", type: "text" },
-      { name: "instructor_bio", label: "Instructor Bio", type: "textarea" },
-      { name: "curriculum", label: "Curriculum", type: "textarea", special: "curriculum", hint: "Format: Title | Duration | Body (one module per line)" },
-
+      { name: "curriculum", label: "Course Outline", type: "textarea", special: "curriculum", hint: "Format: Title | Duration | Body (one module per line)" },
       { name: "isActive", label: "Status", type: "checkbox", default: true }
     ]
   },
@@ -132,7 +114,7 @@ export const ENTITIES: Record<string, EntityConfig> = {
     fields: [
       { name: "name", label: "Name", type: "text", required: true },
       { name: "designation", label: "Designation", type: "text", required: true },
-      { name: "image_url", label: "Profile Image URL", type: "text", hint: "e.g. /images/team/member.jpg or a remote URL" },
+      { name: "image_url", label: "Profile Image", type: "file", hint: "Upload a JPG or PNG profile picture" },
       { name: "bio", label: "Bio", type: "textarea" },
       { name: "display_order", label: "Display Order", type: "number", default: 0 }
     ]
@@ -183,22 +165,6 @@ export const ENTITIES: Record<string, EntityConfig> = {
     ]
   },
 
-  media_uploads: {
-    key: "media_uploads",
-    label: "Media Library",
-    icon: "🖼️",
-    description: "Reusable image/file references for use across the site.",
-    columns: [
-      { key: "file_url", label: "File", primary: true, sub: "file_type" },
-      { key: "alt_text", label: "Alt text" }
-    ],
-    fields: [
-      { name: "file_url", label: "File URL", type: "text", required: true, hint: "In production this comes from your upload handler." },
-      { name: "file_type", label: "File type", type: "text", hint: "e.g. image/jpeg" },
-      { name: "alt_text", label: "Alt text", type: "text" }
-    ]
-  },
-
   contact_submissions: {
     key: "contact_submissions",
     label: "Contact Submissions",
@@ -222,7 +188,6 @@ export const ENTITY_ORDER: ManagedTable[] = [
   "branches",
   "blog_posts",
   "contact_submissions",
-  "media_uploads"
 ];
 
 export function singularize(label: string): string {

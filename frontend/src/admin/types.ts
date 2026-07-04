@@ -1,13 +1,27 @@
+export interface AdminUser {
+  id: number;
+  username: string;
+  email?: string;
+  role: string;
+  last_login_at?: string | null;
+}
+
+export interface Announcement {
+  id: number;
+  message: string;
+  cta_text?: string;
+  cta_link?: string;
+  is_active: boolean;
+  start_date?: string;
+  end_date?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface CourseCurriculumItem {
   title: string;
   dur?: string;
   body?: string;
-}
-
-export interface CourseInstructor {
-  name?: string;
-  role?: string;
-  bio?: string;
 }
 
 export interface CourseOutline {
@@ -15,7 +29,6 @@ export interface CourseOutline {
   outcomes?: string[];
   tools?: string[];
   whoFor?: string;
-  instructor?: CourseInstructor;
   curriculum?: CourseCurriculumItem[];
 }
 
@@ -36,3 +49,87 @@ export interface Course {
   createdAt?: string;
   updatedAt?: string;
 }
+
+export interface SuccessStory {
+  id: number;
+  student_name: string;
+  student_photo?: string | null;
+  course_slug?: string;
+  testimonial: string;
+  achievement_highlight?: string;
+  video_url?: string | null;
+  is_active: boolean;
+  display_order?: number;
+}
+
+export interface TeamMember {
+  id: number;
+  name: string;
+  designation?: string;
+  photo?: string | null;
+  bio?: string;
+  specialty?: string;
+  social_links?: Record<string, string>;
+  is_active: boolean;
+  display_order?: number;
+}
+
+export interface Branch {
+  id: number;
+  name: string;
+  description?: string;
+  website_url?: string;
+  logo?: string | null;
+  display_order?: number;
+}
+
+export interface BlogCategory {
+  id: number;
+  name: string;
+  slug: string;
+}
+
+export interface BlogPost {
+  id: number;
+  title: string;
+  slug: string;
+  excerpt?: string;
+  content: string;
+  featured_image?: string;
+  category_id?: number | null;
+  author_id?: number | null;
+  status: "draft" | "published";
+  published_at?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface ContactSubmission {
+  id: number;
+  name: string;
+  email?: string;
+  phone?: string;
+  message?: string;
+  is_read: boolean;
+  submitted_at?: string;
+}
+
+/** All CRUD-manageable tables (admin_users is intentionally excluded — it's
+ *  managed through the login flow, not a generic table editor). */
+export interface DB {
+  admin_users: AdminUser[];
+  announcements: Announcement[];
+  courses: Course[];
+  success_stories: SuccessStory[];
+  team_members: TeamMember[];
+  branches: Branch[];
+  blog_categories: BlogCategory[];
+  blog_posts: BlogPost[];
+  contact_submissions: ContactSubmission[];
+}
+
+export type ManagedTable = Exclude<keyof DB, "admin_users">;
+
+/** A loosely-typed row shape used by the generic table/form components,
+ *  which operate across every entity type from one config object. */
+export type AnyRecord = Record<string, any> & { id: number };

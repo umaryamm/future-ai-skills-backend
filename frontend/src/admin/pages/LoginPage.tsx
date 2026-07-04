@@ -1,28 +1,29 @@
 import React, { useState } from "react";
 import { useAuth } from "../context/AuthContext";
-
+import logo from "../../assets/logo.png";
 
 export default function LoginPage() {
   const { login, loginError } = useAuth();
-  
+
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
 
-  const success = await login(username, password);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-  if (success) {
-    setUsername("");
-    setPassword("");
-  }
-};
+    const success = await login(username, password);
+
+    if (success) {
+      setUsername("");
+      setPassword("");
+    }
+  };
 
   return (
     <div className="login-screen">
       <div className="login-card">
         <div className="login-brand">
-          <div className="mark">FA</div>
+          <img src={logo} alt="Future AI Skills" className="login-logo" />
           <span>Future AI Skills</span>
         </div>
         <h1>Admin Panel</h1>

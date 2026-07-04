@@ -7,8 +7,6 @@ import { getCourses, createCourse, updateCourse, deleteCourse } from "../../api/
    DATA CONTEXT
    Holds the mock DB in React state for most tables, but the
    `courses` table is wired to the real backend via courseApi.
-   As other tables get real endpoints, add a similar special
-   case for each.
    ============================================================ */
 
 interface DataContextValue {
@@ -28,7 +26,6 @@ function nextId(rows: { id: number }[]): number {
 export function DataProvider({ children }: { children: React.ReactNode }) {
   const [db, setDb] = useState<DB>(seedDB);
 
-  // Load real courses from the backend on mount, replacing the seed data for that table.
   useEffect(() => {
     getCourses()
       .then((courses) => {
