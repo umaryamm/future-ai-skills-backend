@@ -12,7 +12,7 @@ const SOCIALS = [
   },
   {
     label: 'Facebook',
-    href: '#',
+    href: 'https://www.facebook.com/share/1PQXEBaWK4/',
     path: 'M17.5 28V17.5h3.5l.5-4h-4v-2.6c0-1.16.32-1.95 2-1.95H22V5.28C21.65 5.23 20.4 5.12 18.95 5.12c-3.03 0-5.1 1.85-5.1 5.25v2.93H10.3v4h3.55V28z',
   },
   {
