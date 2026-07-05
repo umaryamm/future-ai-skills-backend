@@ -3,7 +3,7 @@ import { useEffect, useRef } from 'react';
 // Attach the returned ref to a container. Any descendant matching the
 // selectors below gets a 'reveal-init' class immediately and 'revealed'
 // once it scrolls into view — same animation as the original site.
-const REVEAL_SELECTOR = '.card, .section-head, .director, .branch-callout, .stat-box, .hero-panel';
+const REVEAL_SELECTOR = '.card, .section-head, .director, .branch-callout, .stat-box, .hero-panel, .why-card, .team-wheel, .home-about-inner, .wheel-person, .about-fact';
 
 export default function useScrollReveal(deps = []) {
   const containerRef = useRef(null);
