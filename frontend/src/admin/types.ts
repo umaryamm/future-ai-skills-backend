@@ -52,26 +52,31 @@ export interface Course {
 
 export interface SuccessStory {
   id: number;
-  student_name: string;
-  student_photo?: string | null;
-  course_slug?: string;
+  studentName: string;
+  studentPhoto?: string | null;
+  courseId?: number | null;
+  course?: { title: string; slug: string } | null; // populated via Prisma include on GET
   testimonial: string;
-  achievement_highlight?: string;
-  video_url?: string | null;
-  is_active: boolean;
-  display_order?: number;
+  achievementHighlight?: string | null;
+  videoUrl?: string | null;
+  isActive: boolean;
+  displayOrder: number;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface TeamMember {
   id: number;
   name: string;
-  designation?: string;
+  designation?: string | null;
   photo?: string | null;
-  bio?: string;
-  specialty?: string;
-  social_links?: Record<string, string>;
-  is_active: boolean;
-  display_order?: number;
+  bio?: string | null;
+  specialty?: string | null;
+  socialLinks?: Record<string, string> | null;
+  isActive: boolean;
+  displayOrder: number;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface Branch {

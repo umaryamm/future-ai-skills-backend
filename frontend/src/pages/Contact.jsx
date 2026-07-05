@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import useStudentCount from '../hooks/useStudentCount.js';
 import COURSE_DATA from '../data/courseData.js';
+import { submitContactForm } from '../api/contactApi';
 
 const EMPTY_FORM = { name: '', phone: '', email: '', course: '', message: '' };
 
@@ -8,18 +9,41 @@ export default function Contact() {
   const { count, increment } = useStudentCount();
   const [form, setForm] = useState(EMPTY_FORM);
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Client-side only — would POST to /api/contact-submissions in production
-    setSubmitted(true);
-    setForm(EMPTY_FORM);
-    increment(); // student has registered — bump the live count
+    setSubmitting(true);
+    setError('');
+
+    // There's no dedicated "course of interest" column on the backend yet,
+    // so we fold it into the message text rather than dropping it silently.
+    const message = form.course
+      ? `Course of interest: ${form.course}\n\n${form.message}`
+      : form.message;
+
+    try {
+      await submitContactForm({
+        name: form.name,
+        email: form.email,
+        phone: form.phone,
+        message,
+      });
+      setSubmitted(true);
+      setForm(EMPTY_FORM);
+      increment(); // student has registered — bump the live count
+    } catch (err) {
+      console.error(err);
+      setError('Something went wrong sending your message. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -78,6 +102,11 @@ export default function Contact() {
                     Thanks — your message has been sent. We'll reply within one working day.
                   </div>
                 )}
+                {error && (
+                  <div className="form-error show">
+                    {error}
+                  </div>
+                )}
                 <div className="form-row">
                   <div className="field">
                     <label htmlFor="cf-name">Full name</label>
@@ -105,7 +134,9 @@ export default function Contact() {
                   <label htmlFor="cf-message">Message</label>
                   <textarea id="cf-message" name="message" placeholder="Tell us what you'd like to know" required value={form.message} onChange={handleChange} />
                 </div>
-                <button type="submit" className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }}>Send Message</button>
+                <button type="submit" className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }} disabled={submitting}>
+                  {submitting ? 'Sending...' : 'Send Message'}
+                </button>
                 <p className="form-note">By submitting, you agree to be contacted by Future AI Skills about your enquiry.</p>
               </form>
             </div>

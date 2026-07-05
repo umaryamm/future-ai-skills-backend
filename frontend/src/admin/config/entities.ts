@@ -12,7 +12,7 @@ export interface FieldConfig {
   rows?: number;
   step?: string;
   options?: string[];
-  special?: "modules" | "faqs" | "list" | "curriculum";
+  special?: "modules" | "faqs" | "list" | "curriculum" | "course-select";
 }
 
 export type ColumnRender = "boolean" | "status" | "draftpill" | "readpill" | "image";
@@ -42,17 +42,17 @@ export const ENTITIES: Record<string, EntityConfig> = {
     icon: "📣",
     description: "The notification bar shown at the top of every page.",
     columns: [
-      { key: "message", label: "Message", primary: true, sub: "cta_text" },
-      { key: "start_date", label: "Window" },
-      { key: "is_active", label: "Status", render: "boolean" }
+      { key: "message", label: "Message", primary: true, sub: "ctaText" },
+      { key: "startDate", label: "Window" },
+      { key: "isActive", label: "Status", render: "boolean" }
     ],
     fields: [
       { name: "message", label: "Message", type: "textarea", required: true, hint: "Shown in the notification bar (max ~300 characters)." },
-      { name: "cta_text", label: "Button text", type: "text" },
-      { name: "cta_link", label: "Button link", type: "text" },
-      { name: "start_date", label: "Start date", type: "date" },
-      { name: "end_date", label: "End date", type: "date" },
-      { name: "is_active", label: "Active", type: "checkbox", default: true }
+      { name: "ctaText", label: "Button text", type: "text" },
+      { name: "ctaLink", label: "Button link", type: "text" },
+      { name: "startDate", label: "Start date", type: "date" },
+      { name: "endDate", label: "End date", type: "date" },
+      { name: "isActive", label: "Active", type: "checkbox", default: true }
     ]
   },
 
@@ -85,18 +85,19 @@ export const ENTITIES: Record<string, EntityConfig> = {
     icon: "⭐",
     description: "Student testimonials shown on the About and Home pages.",
     columns: [
-      { key: "student_name", label: "Student", primary: true, sub: "course_slug" },
-      { key: "achievement_highlight", label: "Highlight" },
-      { key: "is_active", label: "Status", render: "boolean" }
+      { key: "studentName", label: "Student", primary: true, sub: "testimonial" },
+      { key: "achievementHighlight", label: "Highlight" },
+      { key: "isActive", label: "Status", render: "boolean" }
     ],
     fields: [
-      { name: "student_name", label: "Student name", type: "text", required: true },
-      { name: "course_slug", label: "Course slug", type: "text", hint: "Matches a course's slug, e.g. shopify" },
+      { name: "studentName", label: "Student name", type: "text", required: true },
+      { name: "studentPhoto", label: "Student Photo URL (optional)", type: "text" },
+      { name: "courseId", label: "Course", type: "select", special: "course-select", hint: "Which course is this testimonial about?" },
       { name: "testimonial", label: "Testimonial", type: "textarea", required: true },
-      { name: "achievement_highlight", label: "Highlight line", type: "text" },
-      { name: "video_url", label: "Video URL (optional)", type: "text" },
-      { name: "display_order", label: "Display order", type: "number" },
-      { name: "is_active", label: "Active", type: "checkbox", default: true }
+      { name: "achievementHighlight", label: "Highlight line", type: "text" },
+      { name: "videoUrl", label: "Video URL (optional)", type: "text" },
+      { name: "displayOrder", label: "Display order", type: "number", default: 0 },
+      { name: "isActive", label: "Active", type: "checkbox", default: true }
     ]
   },
 
@@ -174,7 +175,7 @@ export const ENTITIES: Record<string, EntityConfig> = {
     columns: [
       { key: "name", label: "From", primary: true, sub: "email" },
       { key: "message", label: "Message" },
-      { key: "is_read", label: "Status", render: "readpill" }
+      { key: "isRead", label: "Status", render: "readpill" }
     ],
     fields: []
   }

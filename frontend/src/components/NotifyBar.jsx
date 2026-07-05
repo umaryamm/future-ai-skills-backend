@@ -8,8 +8,10 @@ export default function NotifyBar() {
     () => sessionStorage.getItem('fas_notify_dismissed') === '1'
   );
 
-  // Pick the first active announcement created in the admin panel.
-  const announcement = db.announcements.find((a) => a.is_active);
+  // The backend's public /api/announcements endpoint already only returns
+  // active announcements within their date window, so this just picks the
+  // first one to display.
+  const announcement = db.announcements.find((a) => a.isActive);
 
   if (dismissed || !announcement) return null;
 
@@ -18,18 +20,18 @@ export default function NotifyBar() {
     sessionStorage.setItem('fas_notify_dismissed', '1');
   };
 
-  const ctaLink = announcement.cta_link || '/contact';
+  const ctaLink = announcement.ctaLink || '/contact';
   const isExternal = /^https?:\/\//.test(ctaLink);
 
   return (
     <div className="notify-bar">
       <div className="notify-inner">
         <span>🎓 <strong>{announcement.message}</strong></span>
-        {announcement.cta_text && (
+        {announcement.ctaText && (
           isExternal ? (
-            <a href={ctaLink} className="notify-cta">{announcement.cta_text} →</a>
+            <a href={ctaLink} className="notify-cta">{announcement.ctaText} →</a>
           ) : (
-            <Link to={ctaLink} className="notify-cta">{announcement.cta_text} →</Link>
+            <Link to={ctaLink} className="notify-cta">{announcement.ctaText} →</Link>
           )
         )}
       </div>

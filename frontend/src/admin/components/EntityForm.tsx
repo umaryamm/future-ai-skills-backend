@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import type { EntityConfig, FieldConfig } from "../config/entities";
 import type { AnyRecord } from "../types";
+import { useData } from "../context/DataContext";
 
 interface Props {
   entity: EntityConfig;
@@ -52,6 +53,11 @@ function initialValues(fields: FieldConfig[], record: AnyRecord | null): Record<
 export default function EntityForm({ entity, record, onSubmit, onCancel }: Props) {
   const [values, setValues] = useState<Record<string, any>>(() => initialValues(entity.fields, record));
 
+  // Only needed for course-select fields (Success Stories linking to a Course).
+  // Courses are already loaded in DataContext, so no extra fetch here.
+  const { db } = useData();
+  const courses = (db.courses as any) || [];
+
   function setField(name: string, value: any) {
     setValues((prev) => ({ ...prev, [name]: value }));
   }
@@ -63,6 +69,15 @@ export default function EntityForm({ entity, record, onSubmit, onCancel }: Props
 
     entity.fields.forEach((f) => {
       if (f.special === "curriculum") return; // handled separately below
+
+      if (f.special === "course-select") {
+        // Dropdown value is a string (or "" for none) — convert to a real
+        // number or null before it hits the courseId FK on the backend.
+        const v = values[f.name];
+        data[f.name] = v === "" || v === null || v === undefined ? null : Number(v);
+        return;
+      }
+
       if (f.type === "number") {
         const v = values[f.name];
         data[f.name] = v === "" || v === null || v === undefined ? null : Number(v);
@@ -84,7 +99,13 @@ export default function EntityForm({ entity, record, onSubmit, onCancel }: Props
   return (
     <form onSubmit={handleSubmit}>
       {entity.fields.map((f) => (
-        <FieldInput key={f.name} field={f} value={values[f.name]} onChange={(v) => setField(f.name, v)} />
+        <FieldInput
+          key={f.name}
+          field={f}
+          value={values[f.name]}
+          onChange={(v) => setField(f.name, v)}
+          courses={courses}
+        />
       ))}
       <div className="modal-actions">
         <button type="button" className="btn btn-outline" onClick={onCancel}>Cancel</button>
@@ -94,8 +115,33 @@ export default function EntityForm({ entity, record, onSubmit, onCancel }: Props
   );
 }
 
-function FieldInput({ field, value, onChange }: { field: FieldConfig; value: any; onChange: (v: any) => void }) {
-  if (field.type === "checkbox" || field.name === "is_active" || field.name === "active") {
+function FieldInput({
+  field,
+  value,
+  onChange,
+  courses,
+}: {
+  field: FieldConfig;
+  value: any;
+  onChange: (v: any) => void;
+  courses: { id: number; title: string }[];
+}) {
+  if (field.special === "course-select") {
+    return (
+      <div className="field">
+        <label>{field.label}</label>
+        <select value={value ?? ""} onChange={(e) => onChange(e.target.value)}>
+          <option value="">— None —</option>
+          {courses.map((c) => (
+            <option key={c.id} value={c.id}>{c.title}</option>
+          ))}
+        </select>
+        {field.hint && <small className="field-hint">{field.hint}</small>}
+      </div>
+    );
+  }
+
+  if (field.type === "checkbox" || field.name === "isActive" || field.name === "is_active" || field.name === "active") {
     return (
       <div className="field">
         <label>{field.label}</label>

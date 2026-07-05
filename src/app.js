@@ -11,6 +11,10 @@ const adminCoursesRouter = require("./routes/adminCourses");
 const authRouter = require("./routes/auth");
 const blogPublicRoutes = require("./routes/blogPublicRoutes");
 const adminBlogRoutes = require("./routes/adminBlogs");
+const successStoriesPublicRoutes = require("./routes/successStoriesPublicRoutes");
+const adminSuccessStoriesRouter = require("./routes/adminSuccessStories");
+const teamMembersPublicRoutes = require("./routes/teamMembersPublicRoutes");
+const adminTeamMembersRouter = require("./routes/adminTeamMembers");
 
 const app = express();
 
@@ -42,7 +46,14 @@ app.use("/api/blog-posts", blogPublicRoutes);
 // Protected routes
 app.use("/api/admin/courses", adminCoursesRouter);
 app.use("/api/admin/blog-posts", adminBlogRoutes);
-
+app.use("/api/success-stories", successStoriesPublicRoutes);
+app.use("/api/team-members", teamMembersPublicRoutes);
+app.use("/api/admin/success-stories", adminSuccessStoriesRouter);
+app.use("/api/admin/team-members", adminTeamMembersRouter);
+app.use('/api/contact', require('./routes/contact'));
+app.use('/api/admin/contact-submissions', require('./routes/adminContact'));
+app.use('/api/announcements', require('./routes/Announcement'));
+app.use('/api/admin/announcements', require('./routes/AdminAnnouncement'));
 // 404
 app.use((req, res) => {
   res.status(404).json({

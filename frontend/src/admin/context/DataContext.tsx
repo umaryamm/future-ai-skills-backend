@@ -9,21 +9,32 @@ import {
   updateBlogPost,
   deleteBlogPost,
 } from "../../api/blogApi";
-
-/* ============================================================
-   DATA CONTEXT
-   Holds the mock DB in React state for most tables, but the
-   `courses` and `blog_posts` tables are wired to the real backend.
-
-   blog_posts loading is split in two:
-   - On mount, every visitor (public or admin) gets the PUBLIC,
-     unauthenticated, published-only list. Safe with no cookie.
-   - The admin blog management page separately calls
-     refreshBlogPostsAdmin() to overwrite blog_posts with the FULL
-     list (drafts included) via the authenticated admin endpoint.
-     This is never called from public-facing pages, so anonymous
-     visitors never trigger a request that needs the admin cookie.
-   ============================================================ */
+import {
+  getPublicSuccessStories,
+  getAllSuccessStoriesAdmin,
+  createSuccessStory,
+  updateSuccessStory,
+  deleteSuccessStory,
+} from "../../api/successStoryApi";
+import {
+  getPublicTeamMembers,
+  getAllTeamMembersAdmin,
+  createTeamMember,
+  updateTeamMember,
+  deleteTeamMember,
+} from "../../api/teamMemberApi";
+import {
+  getContactSubmissionsAdmin,
+  updateContactSubmission,
+  deleteContactSubmission,
+} from "../../api/contactApi";
+import {
+  getPublicAnnouncements,
+  getAllAnnouncementsAdmin,
+  createAnnouncement,
+  updateAnnouncement,
+  deleteAnnouncement,
+} from "../../api/announcementApi";
 
 interface DataContextValue {
   db: DB;
@@ -32,6 +43,10 @@ interface DataContextValue {
   deleteRecord: (table: ManagedTable, id: number) => Promise<void>;
   getRecord: (table: ManagedTable, id: number) => AnyRecord | null;
   refreshBlogPostsAdmin: () => Promise<void>;
+  refreshSuccessStoriesAdmin: () => Promise<void>;
+  refreshTeamMembersAdmin: () => Promise<void>;
+  refreshContactSubmissionsAdmin: () => Promise<void>;
+  refreshAnnouncementsAdmin: () => Promise<void>;
 }
 
 const DataContext = createContext<DataContextValue | undefined>(undefined);
@@ -45,25 +60,30 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     getCourses()
-      .then((courses) => {
-        setDb((prev) => ({ ...prev, courses: courses as any }));
-      })
-      .catch((err) => {
-        console.error("Failed to load courses from backend:", err);
-      });
+      .then((courses) => setDb((prev) => ({ ...prev, courses: courses as any })))
+      .catch((err) => console.error("Failed to load courses from backend:", err));
 
-    // Public, unauthenticated fetch — safe for every visitor, published-only.
     getPublishedBlogPosts()
-      .then((posts) => {
-        setDb((prev) => ({ ...prev, blog_posts: posts as any }));
-      })
-      .catch((err) => {
-        console.error("Failed to load blog posts from backend:", err);
-      });
+      .then((posts) => setDb((prev) => ({ ...prev, blog_posts: posts as any })))
+      .catch((err) => console.error("Failed to load blog posts from backend:", err));
+
+    getPublicSuccessStories()
+      .then((stories) => setDb((prev) => ({ ...prev, success_stories: stories as any })))
+      .catch((err) => console.error("Failed to load success stories from backend:", err));
+
+    getPublicTeamMembers()
+      .then((members) => setDb((prev) => ({ ...prev, team_members: members as any })))
+      .catch((err) => console.error("Failed to load team members from backend:", err));
+
+    getPublicAnnouncements()
+      .then((announcements) => setDb((prev) => ({ ...prev, announcements: announcements as any })))
+      .catch((err) => console.error("Failed to load announcements from backend:", err));
+
+    // NOTE: contact_submissions is never fetched here — there is no public
+    // view of contact submissions. It's only loaded on demand via
+    // refreshContactSubmissionsAdmin(), when an admin opens that section.
   }, []);
 
-  // Called only by the admin blog management page — overwrites blog_posts
-  // with the FULL list (drafts included) via the authenticated admin endpoint.
   const refreshBlogPostsAdmin = useCallback(async () => {
     try {
       const posts = await getAllBlogPostsAdmin();
@@ -73,18 +93,70 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  const refreshSuccessStoriesAdmin = useCallback(async () => {
+    try {
+      const stories = await getAllSuccessStoriesAdmin();
+      setDb((prev) => ({ ...prev, success_stories: stories as any }));
+    } catch (err) {
+      console.error("Failed to load success stories (admin):", err);
+    }
+  }, []);
+
+  const refreshTeamMembersAdmin = useCallback(async () => {
+    try {
+      const members = await getAllTeamMembersAdmin();
+      setDb((prev) => ({ ...prev, team_members: members as any }));
+    } catch (err) {
+      console.error("Failed to load team members (admin):", err);
+    }
+  }, []);
+
+  const refreshContactSubmissionsAdmin = useCallback(async () => {
+    try {
+      const submissions = await getContactSubmissionsAdmin();
+      setDb((prev) => ({ ...prev, contact_submissions: submissions as any }));
+    } catch (err) {
+      console.error("Failed to load contact submissions (admin):", err);
+    }
+  }, []);
+
+  const refreshAnnouncementsAdmin = useCallback(async () => {
+    try {
+      const announcements = await getAllAnnouncementsAdmin();
+      setDb((prev) => ({ ...prev, announcements: announcements as any }));
+    } catch (err) {
+      console.error("Failed to load announcements (admin):", err);
+    }
+  }, []);
+
   const addRecord = useCallback(async (table: ManagedTable, record: Record<string, any>) => {
     if (table === "courses") {
       const created = await createCourse(record);
       setDb((prev) => ({ ...prev, courses: [...(prev.courses as any), created] }));
       return created;
     }
-
     if (table === "blog_posts") {
       const created = await createBlogPost(record);
       setDb((prev) => ({ ...prev, blog_posts: [...(prev.blog_posts as any), created] }));
       return created;
     }
+    if (table === "success_stories") {
+      const created = await createSuccessStory(record);
+      setDb((prev) => ({ ...prev, success_stories: [...(prev.success_stories as any), created] }));
+      return created;
+    }
+    if (table === "team_members") {
+      const created = await createTeamMember(record);
+      setDb((prev) => ({ ...prev, team_members: [...(prev.team_members as any), created] }));
+      return created;
+    }
+    if (table === "announcements") {
+      const created = await createAnnouncement(record);
+      setDb((prev) => ({ ...prev, announcements: [...(prev.announcements as any), created] }));
+      return created;
+    }
+    // NOTE: contact_submissions has no admin "create" — submissions only
+    // come in through the public contact form, handled separately.
 
     let created!: AnyRecord;
     setDb((prev) => {
@@ -104,12 +176,43 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       }));
       return updated;
     }
-
     if (table === "blog_posts") {
       const updated = await updateBlogPost(id, updates);
       setDb((prev) => ({
         ...prev,
         blog_posts: (prev.blog_posts as any).map((r: AnyRecord) => (r.id === id ? updated : r)),
+      }));
+      return updated;
+    }
+    if (table === "success_stories") {
+      const updated = await updateSuccessStory(id, updates);
+      setDb((prev) => ({
+        ...prev,
+        success_stories: (prev.success_stories as any).map((r: AnyRecord) => (r.id === id ? updated : r)),
+      }));
+      return updated;
+    }
+    if (table === "team_members") {
+      const updated = await updateTeamMember(id, updates);
+      setDb((prev) => ({
+        ...prev,
+        team_members: (prev.team_members as any).map((r: AnyRecord) => (r.id === id ? updated : r)),
+      }));
+      return updated;
+    }
+    if (table === "announcements") {
+      const updated = await updateAnnouncement(id, updates);
+      setDb((prev) => ({
+        ...prev,
+        announcements: (prev.announcements as any).map((r: AnyRecord) => (r.id === id ? updated : r)),
+      }));
+      return updated;
+    }
+    if (table === "contact_submissions") {
+      const updated = await updateContactSubmission(id, updates);
+      setDb((prev) => ({
+        ...prev,
+        contact_submissions: (prev.contact_submissions as any).map((r: AnyRecord) => (r.id === id ? updated : r)),
       }));
       return updated;
     }
@@ -132,18 +235,43 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   const deleteRecord = useCallback(async (table: ManagedTable, id: number) => {
     if (table === "courses") {
       await deleteCourse(id);
+      setDb((prev) => ({ ...prev, courses: (prev.courses as any).filter((r: AnyRecord) => r.id !== id) }));
+      return;
+    }
+    if (table === "blog_posts") {
+      await deleteBlogPost(id);
+      setDb((prev) => ({ ...prev, blog_posts: (prev.blog_posts as any).filter((r: AnyRecord) => r.id !== id) }));
+      return;
+    }
+    if (table === "success_stories") {
+      await deleteSuccessStory(id);
       setDb((prev) => ({
         ...prev,
-        courses: (prev.courses as any).filter((r: AnyRecord) => r.id !== id),
+        success_stories: (prev.success_stories as any).filter((r: AnyRecord) => r.id !== id),
       }));
       return;
     }
-
-    if (table === "blog_posts") {
-      await deleteBlogPost(id);
+    if (table === "team_members") {
+      await deleteTeamMember(id);
       setDb((prev) => ({
         ...prev,
-        blog_posts: (prev.blog_posts as any).filter((r: AnyRecord) => r.id !== id),
+        team_members: (prev.team_members as any).filter((r: AnyRecord) => r.id !== id),
+      }));
+      return;
+    }
+    if (table === "announcements") {
+      await deleteAnnouncement(id);
+      setDb((prev) => ({
+        ...prev,
+        announcements: (prev.announcements as any).filter((r: AnyRecord) => r.id !== id),
+      }));
+      return;
+    }
+    if (table === "contact_submissions") {
+      await deleteContactSubmission(id);
+      setDb((prev) => ({
+        ...prev,
+        contact_submissions: (prev.contact_submissions as any).filter((r: AnyRecord) => r.id !== id),
       }));
       return;
     }
@@ -164,7 +292,18 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <DataContext.Provider
-      value={{ db, addRecord, updateRecord, deleteRecord, getRecord, refreshBlogPostsAdmin }}
+      value={{
+        db,
+        addRecord,
+        updateRecord,
+        deleteRecord,
+        getRecord,
+        refreshBlogPostsAdmin,
+        refreshSuccessStoriesAdmin,
+        refreshTeamMembersAdmin,
+        refreshContactSubmissionsAdmin,
+        refreshAnnouncementsAdmin,
+      }}
     >
       {children}
     </DataContext.Provider>

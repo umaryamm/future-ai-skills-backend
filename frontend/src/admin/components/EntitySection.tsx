@@ -12,7 +12,17 @@ interface Props {
 }
 
 export default function EntitySection({ section }: Props) {
-  const { db, addRecord, updateRecord, deleteRecord, refreshBlogPostsAdmin } = useData();
+  const {
+    db,
+    addRecord,
+    updateRecord,
+    deleteRecord,
+    refreshBlogPostsAdmin,
+    refreshSuccessStoriesAdmin,
+    refreshTeamMembersAdmin,
+    refreshContactSubmissionsAdmin,
+    refreshAnnouncementsAdmin,
+  } = useData();
   const { show } = useToast();
   const entity = ENTITIES[section];
   const rows = db[section] as unknown as AnyRecord[];
@@ -21,14 +31,22 @@ export default function EntitySection({ section }: Props) {
 
   const label = singularize(entity.label);
 
-  // Blog posts load published-only on app mount (public-safe). The admin
-  // panel needs the FULL list including drafts, so pull it the moment
-  // this section is actually opened by a logged-in admin.
+  // Blog posts, success stories, team members, and contact submissions all
+  // need their full/admin-only data loaded the moment this section is
+  // actually opened by a logged-in admin.
   useEffect(() => {
     if (section === "blog_posts") {
       refreshBlogPostsAdmin();
+    } else if (section === "success_stories") {
+      refreshSuccessStoriesAdmin();
+    } else if (section === "team_members") {
+      refreshTeamMembersAdmin();
+    } else if (section === "contact_submissions") {
+      refreshContactSubmissionsAdmin();
+    } else if (section === "announcements") {
+      refreshAnnouncementsAdmin();
     }
-  }, [section, refreshBlogPostsAdmin]);
+  }, [section, refreshBlogPostsAdmin, refreshSuccessStoriesAdmin, refreshTeamMembersAdmin, refreshContactSubmissionsAdmin, refreshAnnouncementsAdmin]);
 
   function openNew() {
     setEditingId("new");
@@ -70,8 +88,13 @@ export default function EntitySection({ section }: Props) {
   }
 
   async function handleToggleRead(row: AnyRecord) {
-    await updateRecord(section, row.id, { is_read: !row.is_read });
-    show("Submission updated.");
+    try {
+      await updateRecord(section, row.id, { isRead: !row.isRead });
+      show("Submission updated.");
+    } catch (err: any) {
+      console.error("Failed to update submission:", err);
+      show("Failed to update submission.");
+    }
   }
 
   const editingRecord = editingId === "new" ? null : editingId !== null ? rows.find((r) => r.id === editingId) || null : undefined;
@@ -97,7 +120,7 @@ export default function EntitySection({ section }: Props) {
           renderRowActions={(row) => (
             <>
               <button className="btn btn-outline btn-sm" onClick={() => handleToggleRead(row)}>
-                {row.is_read ? "Mark unread" : "Mark read"}
+                {row.isRead ? "Mark unread" : "Mark read"}
               </button>
               <button className="btn btn-danger btn-sm" onClick={() => handleDelete(row.id)}>
                 Delete

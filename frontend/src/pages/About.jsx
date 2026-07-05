@@ -1,20 +1,17 @@
 import useScrollReveal from '../hooks/useScrollReveal.js';
-
-const TEAM = [
-  { name: 'Sara Khalid', role: 'Lead — Graphic Designing', bio: '7 years in branding, currently designing for clients across the UK and UAE.', socials: [['LinkedIn', 'in'], ['Instagram', 'ig']] },
-  { name: 'Ahmad Fraz', role: 'Lead — YouTube Automation', bio: 'Runs 4 profitable faceless YouTube channels, teaches the exact system he uses.', socials: [['LinkedIn', 'in'], ['YouTube', 'yt']] },
-  { name: 'Mahnoor Ali', role: 'Lead — Digital Marketing', bio: 'Google & Meta certified, manages ad accounts for local and international brands.', socials: [['LinkedIn', 'in'], ['Twitter', 'x']] },
-  { name: 'Zain Malik', role: 'Lead — Freelancing & E-commerce', bio: 'Top Rated on Upwork and a Fiverr Level 2 seller with 500+ completed orders.', socials: [['LinkedIn', 'in'], ['Upwork', 'up']] },
-];
-
-const STORIES = [
-  { badge: 'First Fiverr order in 3 weeks', quote: "I walked in knowing nothing about design. I walked out with a Fiverr gig that pays my whole family's expenses.", name: 'Ayesha Noor', course: 'Graphic Designing, Batch 6' },
-  { badge: '$400 first month on Upwork', quote: 'The freelancing module alone was worth the fee — they taught us how to actually win clients, not just use the tools.', name: 'Hassan Raza', course: 'Freelancing Mastery, Batch 3' },
-  { badge: 'Shopify store profitable in month 2', quote: "They didn't just teach Shopify setup — they taught how to actually find products worth selling.", name: 'Rimsha Iqbal', course: 'E-commerce Mastery, Batch 2' },
-];
+import { useData } from '../admin/context/DataContext.tsx';
 
 export default function About() {
   const revealRef = useScrollReveal();
+  const { db } = useData();
+
+  const team = (db.team_members || [])
+    .filter((m) => m.isActive)
+    .sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0));
+
+  const stories = (db.success_stories || [])
+    .filter((s) => s.isActive)
+    .sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0));
 
   return (
     <div ref={revealRef}>
@@ -57,17 +54,16 @@ export default function About() {
             <h2>Instructors who work in the industry they teach</h2>
           </div>
           <div className="grid grid-4">
-            {TEAM.map(person => (
-              <div className="card person-card" key={person.name}>
-                <img className="person-photo" src="https://placehold.co/300x300/F2EFEC/1C1917?text=Instructor" alt={`Photo of ${person.name}`} />
+            {team.map((person) => (
+              <div className="card person-card" key={person.id}>
+                <img
+                  className="person-photo"
+                  src={person.photo || 'https://placehold.co/300x300/F2EFEC/1C1917?text=Instructor'}
+                  alt={`Photo of ${person.name}`}
+                />
                 <h3>{person.name}</h3>
-                <div className="person-role">{person.role}</div>
+                <div className="person-role">{person.designation}</div>
                 <p>{person.bio}</p>
-                <div className="person-social">
-                  {person.socials.map(([label, abbr]) => (
-                    <a href="#" aria-label={label} key={label}>{abbr}</a>
-                  ))}
-                </div>
               </div>
             ))}
           </div>
@@ -93,15 +89,17 @@ export default function About() {
             <h2>What our students have gone on to do</h2>
           </div>
           <div className="grid grid-3">
-            {STORIES.map(s => (
-              <div className="card testimonial-card" key={s.name}>
-                <span className="badge-achievement">{s.badge}</span>
-                <p className="testimonial-quote">{s.quote}</p>
+            {stories.map((s) => (
+              <div className="card testimonial-card" key={s.id}>
+                {s.achievementHighlight && <span className="badge-achievement">{s.achievementHighlight}</span>}
+                <p className="testimonial-quote">{s.testimonial}</p>
                 <div className="testimonial-who">
-                  <div className="testimonial-photo"></div>
+                  <div className="testimonial-photo">
+                    {s.studentPhoto && <img src={s.studentPhoto} alt={s.studentName} />}
+                  </div>
                   <div>
-                    <div className="testimonial-name">{s.name}</div>
-                    <div className="testimonial-course">{s.course}</div>
+                    <div className="testimonial-name">{s.studentName}</div>
+                    {s.course?.title && <div className="testimonial-course">{s.course.title}</div>}
                   </div>
                 </div>
               </div>
