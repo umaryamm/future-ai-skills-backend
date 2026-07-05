@@ -283,11 +283,11 @@ export const seedDB: DB = {
   ],
 
   team_members: [
-    { id: 1, name: "Director Name", designation: "Founder & Director", photo: null, bio: "Founded Future AI Skills to bring practical, income-generating skills to Shujabad.", specialty: "Institute Leadership", social_links: {}, is_active: true, display_order: 1 },
-    { id: 2, name: "Instructor Name", designation: "Lead Instructor — Video Editing & YouTube", photo: null, bio: "Runs multiple faceless YouTube channels and trains students on the exact editing pipeline used for clients.", specialty: "Video Editing, YouTube Automation", social_links: {}, is_active: true, display_order: 2 },
-    { id: 3, name: "Instructor Name", designation: "Lead Instructor — Digital Marketing", photo: null, bio: "Manages ad accounts for local businesses and teaches Meta & Google Ads with real campaign data.", specialty: "Digital Marketing, SEO", social_links: {}, is_active: true, display_order: 3 },
-    { id: 4, name: "Instructor Name", designation: "Lead Instructor — Graphic Design", photo: null, bio: "Freelance designer with client work across Photoshop, Illustrator, and brand identity.", specialty: "Graphic Design, Branding", social_links: {}, is_active: true, display_order: 4 },
-    { id: 5, name: "Instructor Name", designation: "Lead Instructor — E-commerce & Freelancing", photo: null, bio: "Active seller across Daraz, Etsy, and Amazon, teaching the marketplace courses from first-hand experience.", specialty: "Shopify, Amazon, Daraz, Etsy, eBay, Fiverr", social_links: {}, is_active: true, display_order: 5 }
+    { id: 1, name: "Muhammad Usman", designation: "Founder & Director", photo: null, bio: "Founded Future AI Skills to bring practical, income-generating skills to Shujabad.", specialty: "Institute Leadership", social_links: {}, is_active: true, display_order: 1 },
+    { id: 2, name: "Ahmad Fraz", designation: "Lead Instructor — Video Editing & YouTube", photo: null, bio: "Runs multiple faceless YouTube channels and trains students on the exact editing pipeline used for clients.", specialty: "Video Editing, YouTube Automation", social_links: {}, is_active: true, display_order: 2 },
+    { id: 3, name: "Mahnoor Ali", designation: "Lead Instructor — Digital Marketing", photo: null, bio: "Manages ad accounts for local businesses and teaches Meta & Google Ads with real campaign data.", specialty: "Digital Marketing, SEO", social_links: {}, is_active: true, display_order: 3 },
+    { id: 4, name: "Sara Khalid", designation: "Lead Instructor — Graphic Design", photo: null, bio: "Freelance designer with client work across Photoshop, Illustrator, and brand identity.", specialty: "Graphic Design, Branding", social_links: {}, is_active: true, display_order: 4 },
+    { id: 5, name: "Zain Malik", designation: "Lead Instructor — E-commerce & Freelancing", photo: null, bio: "Active seller across Daraz, Etsy, and Amazon, teaching the marketplace courses from first-hand experience.", specialty: "Shopify, Amazon, Daraz, Etsy, eBay, Fiverr", social_links: {}, is_active: true, display_order: 5 }
   ],
 
   branches: [
@@ -328,7 +328,6 @@ export const seedDB: DB = {
     }
   ],
 
-  media_uploads: [],
 
   contact_submissions: [
     { id: 1, name: "Sara Khan", email: "sara.k@example.com", phone: "0300-1234567", message: "Hi, when does the next Digital Marketing batch start?", is_read: false, submitted_at: "2026-06-28" },
