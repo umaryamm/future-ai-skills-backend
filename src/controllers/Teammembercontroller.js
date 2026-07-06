@@ -7,15 +7,23 @@ function validationError(zodResult) {
   const fieldMsgs = Object.entries(flat.fieldErrors)
     .map(([field, msgs]) => `${field}: ${msgs.join(', ')}`)
     .join('; ');
-  const err = new Error(fieldMsgs || 'Validation failed');
+  const formMsgs = flat.formErrors.join('; ');
+  const message = [fieldMsgs, formMsgs].filter(Boolean).join(' | ') || 'Validation failed';
+  const err = new Error(message);
   err.statusCode = 400;
   return err;
 }
 
-// ------------------------------------------------------------
-// PUBLIC: GET /api/team-members
-// Only active members, in display order. No auth required.
-// ------------------------------------------------------------
+// Multipart fields all arrive as strings; the uploaded file (if any)
+// lands on req.file, not req.body. Normalize both before Zod sees it.
+function normalizeBody(req) {
+  const body = { ...req.body };
+  if (req.file) body.photo = req.file.path;
+  if (body.isActive !== undefined) body.isActive = body.isActive === 'true' || body.isActive === true;
+  if (body.displayOrder !== undefined && body.displayOrder !== '') body.displayOrder = Number(body.displayOrder);
+  return body;
+}
+
 exports.getPublicTeamMembers = asyncHandler(async (req, res) => {
   const members = await prisma.teamMember.findMany({
     where: { isActive: true },
@@ -24,40 +32,26 @@ exports.getPublicTeamMembers = asyncHandler(async (req, res) => {
   res.json(members);
 });
 
-// ------------------------------------------------------------
-// ADMIN: GET /api/admin/team-members
-// Every member regardless of isActive.
-// ------------------------------------------------------------
 exports.getAllTeamMembers = asyncHandler(async (req, res) => {
-  const members = await prisma.teamMember.findMany({
-    orderBy: { displayOrder: 'asc' },
-  });
+  const members = await prisma.teamMember.findMany({ orderBy: { displayOrder: 'asc' } });
   res.json(members);
 });
 
-// ------------------------------------------------------------
-// ADMIN: GET /api/admin/team-members/:id
-// ------------------------------------------------------------
 exports.getTeamMemberById = asyncHandler(async (req, res) => {
   const id = Number(req.params.id);
   const member = await prisma.teamMember.findUnique({ where: { id } });
-
   if (!member) {
     const err = new Error('Team member not found');
     err.statusCode = 404;
     throw err;
   }
-
   res.json(member);
 });
 
-// ------------------------------------------------------------
-// ADMIN: POST /api/admin/team-members
-// ------------------------------------------------------------
 exports.createTeamMember = asyncHandler(async (req, res) => {
-  const result = validateCreateTeamMember(req.body);
+  const body = normalizeBody(req);
+  const result = validateCreateTeamMember(body);
   if (!result.success) throw validationError(result);
-
   const data = result.data;
 
   const member = await prisma.teamMember.create({
@@ -72,19 +66,14 @@ exports.createTeamMember = asyncHandler(async (req, res) => {
       displayOrder: data.displayOrder,
     },
   });
-
   res.status(201).json(member);
 });
 
-// ------------------------------------------------------------
-// ADMIN: PUT /api/admin/team-members/:id
-// ------------------------------------------------------------
 exports.updateTeamMember = asyncHandler(async (req, res) => {
   const id = Number(req.params.id);
-
-  const result = validateUpdateTeamMember(req.body);
+  const body = normalizeBody(req);
+  const result = validateUpdateTeamMember(body);
   if (!result.success) throw validationError(result);
-
   const data = result.data;
 
   const existing = await prisma.teamMember.findUnique({ where: { id } });
@@ -107,23 +96,17 @@ exports.updateTeamMember = asyncHandler(async (req, res) => {
       ...(data.displayOrder !== undefined && { displayOrder: data.displayOrder }),
     },
   });
-
   res.json(member);
 });
 
-// ------------------------------------------------------------
-// ADMIN: DELETE /api/admin/team-members/:id
-// ------------------------------------------------------------
 exports.deleteTeamMember = asyncHandler(async (req, res) => {
   const id = Number(req.params.id);
-
   const existing = await prisma.teamMember.findUnique({ where: { id } });
   if (!existing) {
     const err = new Error('Team member not found');
     err.statusCode = 404;
     throw err;
   }
-
   await prisma.teamMember.delete({ where: { id } });
   res.json({ success: true, message: 'Team member deleted' });
 });

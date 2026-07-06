@@ -1,7 +1,7 @@
 // Same bridge pattern as courseHelpers.js — merges admin-panel
 // blog_posts records with the original hand-written placeholder
 // articles when the slug matches, and falls back to a simple
-// single-paragraph layout for brand-new posts added purely
+// paragraph-split layout for brand-new posts added purely
 // through the admin panel.
 import BLOG_DATA from './blogData.js';
 
@@ -34,8 +34,9 @@ export function mergeBlog(adminPost) {
     img: extra?.img || 'Future+AI+Skills',
     meta: extra?.meta || `${cat.catLabel} · ${mins} min read`,
     teaser: adminPost.excerpt || extra?.teaser || '',
-    body: extra?.body || [adminPost.content || ''],
-    publishedAt: adminPost.published_at || '',
+    body: extra?.body || (adminPost.content || '').split(/\n\s*\n/).filter(Boolean),
+    featuredImage: adminPost.featuredImage || null,
+    publishedAt: adminPost.publishedAt || '',
     ...cat,
   };
 }

@@ -188,15 +188,22 @@ function FieldInput({
     );
   }
 
-  if (field.type === "file") {
-    return (
-      <div className="field">
-        <label>{field.label}</label>
-        <input type="file" onChange={() => onChange(value)} />
-        {field.hint && <small className="field-hint">{field.hint}</small>}
-      </div>
-    );
-  }
+ if (field.type === "file") {
+  return (
+    <div className="field">
+      <label>{field.label}</label>
+      <input
+        type="file"
+        accept="image/*"
+        onChange={(e) => onChange(e.target.files?.[0] ?? null)}
+      />
+      {value && typeof value === "string" && (
+        <img src={value} alt="Current" style={{ width: 60, height: 60, borderRadius: "50%", marginTop: 8, objectFit: "cover" }} />
+      )}
+      {field.hint && <small className="field-hint">{field.hint}</small>}
+    </div>
+  );
+}
 
   return (
     <div className="field">

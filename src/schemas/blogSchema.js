@@ -6,10 +6,11 @@ const createBlogSchema = z.object({
   title: z.string().min(1, 'Title is required').max(200),
   slug: z
     .string()
-    .min(1, 'Slug is required')
     .max(220)
     .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Slug must be lowercase, alphanumeric, hyphen-separated')
-    .optional(),
+    .optional()
+    .nullable()
+    .or(z.literal('')),
   excerpt: z.string().max(500).optional().nullable(),
   content: z.string().min(1, 'Content is required'),
   featuredImage: z.string().max(255).url('Must be a valid URL').optional().nullable().or(z.literal('')),

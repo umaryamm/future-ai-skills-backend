@@ -69,7 +69,7 @@ export const ENTITIES: Record<string, EntityConfig> = {
     ],
     fields: [
       { name: "title", label: "Course Title", type: "text", required: true },
-      { name: "slug", label: "Slug", type: "text", required: true, hint: "e.g. video-editing-mastery — leave blank to auto-generate from title" },
+      { name: "slug", label: "Slug", type: "text", hint: "e.g. video-editing-mastery — leave blank to auto-generate from title" },
       { name: "category", label: "Category", type: "text", required: true },
       { name: "duration", label: "Duration", type: "text", required: true, hint: "e.g. 3 Months or 12 Weeks" },
       { name: "thumbnailImage", label: "Cover Image URL", type: "text" },
@@ -151,7 +151,7 @@ export const ENTITIES: Record<string, EntityConfig> = {
     ],
     fields: [
       { name: "title", label: "Title", type: "text", required: true },
-      { name: "slug", label: "Slug", type: "text", required: true, hint: "e.g. future-of-ai-2026 — leave blank to auto-generate from title" },
+      { name: "slug", label: "Slug", type: "text", hint: "e.g. future-of-ai-2026 — leave blank to auto-generate from title" },
       {
         name: "category",
         label: "Category",
