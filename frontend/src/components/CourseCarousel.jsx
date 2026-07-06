@@ -88,6 +88,11 @@ export default function CourseCarousel({ courses }) {
           {slides.map((c, i) => (
             <div className="cc-slide" key={`${c.slug}-${i}`}>
               <div className="card course-card">
+                <Link to={`/courses/${c.slug}`} className={`course-thumb ${c.tagClass}`} aria-label={c.title}>
+                  {c.thumbnail
+                    ? <img src={c.thumbnail} alt={c.title} loading="lazy" />
+                    : <span className="course-thumb-fallback">{c.title.charAt(0)}</span>}
+                </Link>
                 <div className="course-top">
                   <span className={`course-tag ${c.tagClass}`}>{c.tagLabel}</span>
                   <span className="course-duration">{c.duration}</span>
