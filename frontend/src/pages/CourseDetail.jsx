@@ -1,67 +1,15 @@
-import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import CurriculumAccordion from '../components/CurriculumAccordion.jsx';
 import useScrollReveal from '../hooks/useScrollReveal.js';
-import { getCourseBySlug, getCourses } from '../api/courseApi';
-
-function getTagClass(category) {
-  const map = {
-    "YouTube": "tag-content",
-    "Marketing": "tag-marketing",
-    "Design": "tag-design",
-    "Freelancing": "tag-freelancing",
-    "E-Commerce": "tag-ecommerce",
-    "Content": "tag-content",
-  };
-  return map[category] || "tag-content";
-}
+import { useData } from '../admin/context/DataContext.tsx';
+import { getCourseBySlug, getCourseList } from '../data/courseHelpers.js';
 
 export default function CourseDetail() {
   const { slug } = useParams();
+  const { db } = useData();
+  const data = getCourseBySlug(db.courses, slug);
   const revealRef = useScrollReveal([slug]);
 
-  const [data, setData] = useState(null);
-  const [related, setRelated] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [notFound, setNotFound] = useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function load() {
-      setLoading(true);
-      setNotFound(false);
-      try {
-        const course = await getCourseBySlug(slug);
-        if (cancelled) return;
-        setData(course);
-
-        const all = await getCourses();
-        if (cancelled) return;
-        setRelated(all.filter((c) => c.slug !== slug).slice(0, 3));
-      } catch (err) {
-        console.error(err);
-        if (!cancelled) setNotFound(true);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    }
-
-    load();
-    return () => {
-      cancelled = true;
-    };
-  }, [slug]);
-
-  if (loading) {
-    return (
-      <div className="section" style={{ padding: '100px 0', textAlign: 'center' }}>
-        <div className="container">Loading course...</div>
-      </div>
-    );
-  }
-
-  if (notFound || !data) {
+  if (!data) {
     return (
       <div className="section" style={{ padding: '100px 0', textAlign: 'center' }}>
         <div className="container">
@@ -76,11 +24,7 @@ export default function CourseDetail() {
     );
   }
 
-  const outline = data.courseOutline || {};
-  const hasOutcomes = Array.isArray(outline.outcomes) && outline.outcomes.length > 0;
-  const hasTools = Array.isArray(outline.tools) && outline.tools.length > 0;
-  const hasCurriculum = Array.isArray(outline.curriculum) && outline.curriculum.length > 0;
-  const hasInstructor = outline.instructor && (outline.instructor.name || outline.instructor.role || outline.instructor.bio);
+  const related = getCourseList(db.courses).filter((c) => c.slug !== slug).slice(0, 3);
 
   return (
     <div ref={revealRef}>
@@ -90,13 +34,13 @@ export default function CourseDetail() {
             ← All courses
           </Link>
           <div className="course-top" style={{ marginBottom: 10 }}>
-            <span className={`course-tag ${getTagClass(data.category)}`}>{data.category}</span>
+            <span className={`course-tag ${data.tagClass}`}>{data.tagLabel}</span>
             <span className="course-duration" style={{ color: '#ADA79F' }}>{data.duration}</span>
           </div>
           <h1 style={{ maxWidth: '22ch' }}>{data.title}</h1>
-          <p className="hero-lead">{data.description}</p>
+          <p className="hero-lead">{data.summary}</p>
           <div className="course-rating" style={{ color: '#C7C2BB', marginBottom: 22 }}>
-            ⭐ <b>{data.rating}</b> ({data.reviewCount} reviews)
+            ⭐ <b>{data.rating}</b> ({data.reviews} reviews)
           </div>
           <div className="hero-actions">
             <Link to="/contact" className="btn btn-accent">Enroll in this course</Link>
@@ -105,100 +49,88 @@ export default function CourseDetail() {
         </div>
       </section>
 
-      {(outline.intro || hasOutcomes) && (
-        <section className="section" style={{ paddingTop: 56 }}>
+      {data.thumbnail && (
+        <section className="section" style={{ paddingTop: 0, paddingBottom: 0 }}>
           <div className="container">
-            <div className="director" style={{ gridTemplateColumns: '1.4fr .9fr', alignItems: 'start', padding: 44 }}>
-              <div>
-                {outline.intro && (
-                  <>
-                    <div className="eyebrow">Overview</div>
-                    <p style={{ fontSize: '1.02rem' }}>{outline.intro}</p>
-                  </>
-                )}
+            <div className={`course-detail-banner ${data.tagClass}`}>
+              <img src={data.thumbnail} alt={data.title} />
+            </div>
+          </div>
+        </section>
+      )}
 
-                {hasOutcomes && (
-                  <>
-                    <div className="eyebrow" style={{ marginTop: 36 }}>What You'll Learn</div>
-                    <ul style={{ display: 'flex', flexDirection: 'column', gap: 12, listStyle: 'none', padding: 0, margin: 0 }}>
-                      {outline.outcomes.map((item) => (
-                        <li key={item} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', color: 'var(--secondary)' }}>
-                          <span style={{ color: 'var(--accent)', flexShrink: 0 }}>✓</span>
-                          <span>{item}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </>
-                )}
-              </div>
+      <section className="section" style={{ paddingTop: 56 }}>
+        <div className="container">
+          <div className="director" style={{ gridTemplateColumns: '1.4fr .9fr', alignItems: 'start', padding: 44 }}>
+            <div>
+              <div className="eyebrow">Overview</div>
+              <p style={{ fontSize: '1.02rem' }}>{data.intro}</p>
 
-              <div>
-                <div className="eyebrow">Course Snapshot</div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                  <div className="contact-info-item" style={{ borderBottom: '1px solid var(--card-border)' }}>
-                    <div className="ic">⏱️</div>
-                    <div><h4>Duration</h4><p>{data.duration}, physical campus batches</p></div>
-                  </div>
-                  <div className="contact-info-item" style={{ borderBottom: '1px solid var(--card-border)' }}>
-                    <div className="ic">🎯</div>
-                    <div><h4>Format</h4><p>100% in-person, Shujabad campus</p></div>
-                  </div>
-                  {hasTools && (
-                    <div className="contact-info-item" style={{ borderBottom: 'none' }}>
-                      <div className="ic">🧰</div>
-                      <div><h4>Tools Covered</h4><p>{outline.tools.join(', ')}</p></div>
-                    </div>
-                  )}
+              {data.outcomes && (
+                <>
+                  <div className="eyebrow" style={{ marginTop: 36 }}>What You'll Learn</div>
+                  <ul style={{ display: 'flex', flexDirection: 'column', gap: 12, listStyle: 'none', padding: 0, margin: 0 }}>
+                    {data.outcomes.map((item) => (
+                      <li key={item} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', color: 'var(--secondary)' }}>
+                        <span style={{ color: 'var(--accent)', flexShrink: 0 }}>✓</span>
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
+
+              {data.curriculum.length > 0 && (
+                <>
+                  <div className="eyebrow" style={{ marginTop: 36 }}>Course Outline</div>
+                  <ul style={{ display: 'flex', flexDirection: 'column', gap: 12, listStyle: 'none', padding: 0, margin: 0 }}>
+                    {data.curriculum.map((mod) => (
+                      <li key={mod.title} style={{ color: 'var(--secondary)' }}>
+                        <strong style={{ color: 'var(--primary)' }}>{mod.title}</strong>{mod.dur ? ` — ${mod.dur}` : ''}
+                        {mod.body ? <div>{mod.body}</div> : null}
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
+            </div>
+
+            <div>
+              <div className="eyebrow">Course Snapshot</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <div className="contact-info-item" style={{ borderBottom: '1px solid var(--card-border)' }}>
+                  <div className="ic">⏱️</div>
+                  <div><h4>Duration</h4><p>{data.duration}, physical campus batches</p></div>
                 </div>
+                <div className="contact-info-item" style={{ borderBottom: data.tools ? '1px solid var(--card-border)' : 'none' }}>
+                  <div className="ic">🎯</div>
+                  <div><h4>Format</h4><p>100% in-person, Shujabad campus</p></div>
+                </div>
+                {data.tools && (
+                  <div className="contact-info-item" style={{ borderBottom: 'none' }}>
+                    <div className="ic">🧰</div>
+                    <div><h4>Tools Covered</h4><p>{data.tools.join(', ')}</p></div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
-        </section>
-      )}
+        </div>
+      </section>
 
-      {hasCurriculum && (
-        <section className="section section-tight">
-          <div className="container">
-            <div className="section-head">
-              <div className="eyebrow">Curriculum</div>
-              <h2 style={{ fontSize: '1.5rem' }}>What's covered, module by module</h2>
-            </div>
-            <CurriculumAccordion modules={outline.curriculum} />
-          </div>
-        </section>
-      )}
-
-      {outline.whoFor && (
+      {data.whoFor && (
         <section className="coursedetials-section">
           <div className="coursedetails-container">
             <div className="coursesection-head">
               <div className="eyebrow">Who This Course Is For</div>
               <h2>Is this the right track for you?</h2>
             </div>
-            <p style={{ maxWidth: 640, margin: '0 auto', textAlign: 'center', fontSize: '1.02rem' }}>{outline.whoFor}</p>
+            <p style={{ maxWidth: 640, margin: '0 auto', textAlign: 'center', fontSize: '1.02rem' }}>{data.whoFor}</p>
           </div>
         </section>
       )}
 
-      {hasInstructor && (
-        <section className="section section-tight">
-          <div className="container">
-            <div className="director" style={{ gridTemplateColumns: '.5fr 1.5fr' }}>
-              <img
-                src="https://placehold.co/500x625/1C1917/F59E0B?text=Instructor"
-                alt="Instructor portrait"
-                className="director-photo"
-              />
-              <div>
-                <div className="eyebrow">Your Instructor</div>
-                <div className="director-name" style={{ fontSize: '1.3rem' }}>{outline.instructor.name}</div>
-                <div className="director-role">{outline.instructor.role}</div>
-                <p style={{ marginTop: 14 }}>{outline.instructor.bio}</p>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
+      
 
       <section className="section-tight">
         <div className="container">
@@ -223,12 +155,12 @@ export default function CourseDetail() {
               {related.map((c) => (
                 <Link to={`/courses/${c.slug}`} className="card course-card" style={{ textDecoration: 'none' }} key={c.slug}>
                   <div className="course-top">
-                    <span className={`course-tag ${getTagClass(c.category)}`}>{c.category}</span>
+                    <span className={`course-tag ${c.tagClass}`}>{c.tagLabel}</span>
                     <span className="course-duration">{c.duration}</span>
                   </div>
                   <h3>{c.title}</h3>
-                  <p>{c.description}</p>
-                  <div className="course-rating">⭐ <b>{c.rating}</b> ({c.reviewCount} reviews)</div>
+                  <p>{c.summary}</p>
+                  <div className="course-rating">⭐ <b>{c.rating}</b> ({c.reviews} reviews)</div>
                   <div className="course-foot"><span className="link-arrow">View full details →</span></div>
                 </Link>
               ))}
