@@ -622,48 +622,43 @@ p{margin:0 0 1em;color:var(--secondary);}
    (Appended; nothing above is modified.)
    ============================================================ */
 
-/* ---------------- Moving banner slider (below navbar) ---------------- */
-.banner-slider{position:relative;overflow:hidden;background:var(--primary);}
-.banner-viewport{position:relative;min-height:340px;}
+/* ---------------- Moving banner slider (image banners, below navbar) ---------------- */
+.banner-slider{position:relative;overflow:hidden;background:var(--primary);touch-action:pan-y;}
+/* Viewport keeps the artwork's own 16:5 ratio, so banners scale on every
+   device without being stretched or cropped. */
+.banner-viewport{position:relative;width:100%;overflow:hidden;}
+.banner-track{
+  display:flex;
+  transition:transform .7s var(--ease);
+  will-change:transform;
+}
 .banner-slide{
-  position:absolute;inset:0;display:flex;align-items:center;
-  opacity:0;visibility:hidden;transform:scale(1.04);
-  transition:opacity .8s var(--ease), transform 1.1s var(--ease), visibility .8s;
-  color:var(--white);
+  flex:0 0 auto;
+  position:relative;
+  display:block;
+  line-height:0;                 /* kills the inline-image gap */
 }
-.banner-slide.is-active{opacity:1;visibility:visible;transform:scale(1);}
-.banner-slide::after{
-  content:"";position:absolute;inset:0;
-  background:radial-gradient(circle at 1px 1px, rgba(255,255,255,.06) 1px, transparent 0) 0 0/22px 22px;
-  pointer-events:none;
+.banner-slide picture{display:block;}
+.banner-img{
+  width:100%;
+  height:auto;                   /* full banner stays visible — nothing cut off */
+  aspect-ratio:16 / 5;           /* matches the 1600x500 artwork */
+  object-fit:cover;
+  display:block;
+  user-select:none;
+  -webkit-user-drag:none;
 }
-.banner-a{background:linear-gradient(120deg,#0B1629 0%,#14213D 55%,#1E3A5F 100%);}
-.banner-b{background:linear-gradient(120deg,#1A1206 0%,#3A2A0C 55%,#B7791F 140%);}
-.banner-c{background:linear-gradient(120deg,#0B1629 0%,#123 45%,#3F6C51 130%);}
-.banner-inner{position:relative;z-index:2;max-width:760px;padding-top:44px;padding-bottom:44px;}
-.banner-eyebrow{
-  font-family:var(--font-mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;
-  color:var(--accent);margin-bottom:12px;
-}
-.banner-title{
-  font-size:clamp(1.7rem,3.4vw,2.7rem);color:var(--white);letter-spacing:-.01em;margin-bottom:.4em;
-}
-.banner-text{font-size:1.02rem;color:#D3DBEA;max-width:56ch;margin-bottom:22px;}
-.banner-slide.is-active .banner-eyebrow{animation:bannerRise .7s var(--ease) .15s both;}
-.banner-slide.is-active .banner-title{animation:bannerRise .7s var(--ease) .25s both;}
-.banner-slide.is-active .banner-text{animation:bannerRise .7s var(--ease) .35s both;}
-.banner-slide.is-active .banner-cta{animation:bannerRise .7s var(--ease) .45s both;}
-@keyframes bannerRise{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:none;}}
 
 .banner-arrow{
   position:absolute;top:50%;transform:translateY(-50%);z-index:5;
   width:44px;height:44px;border-radius:50%;
-  background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);
+  background:rgba(11,22,41,.45);border:1px solid rgba(255,255,255,.30);
   color:var(--white);font-size:1.5rem;line-height:1;cursor:pointer;
   display:flex;align-items:center;justify-content:center;
+  backdrop-filter:blur(2px);
   transition:background .2s ease, transform .2s ease;
 }
-.banner-arrow:hover{background:rgba(255,255,255,.24);}
+.banner-arrow:hover{background:rgba(11,22,41,.70);}
 .banner-prev{left:18px;}
 .banner-next{right:18px;}
 .banner-dots{
@@ -672,7 +667,8 @@ p{margin:0 0 1em;color:var(--secondary);}
 }
 .banner-dot{
   width:10px;height:10px;border-radius:50%;padding:0;cursor:pointer;
-  background:rgba(255,255,255,.35);border:none;transition:background .2s ease, transform .2s ease;
+  background:rgba(255,255,255,.55);border:1px solid rgba(11,22,41,.35);
+  transition:background .2s ease, transform .2s ease;
 }
 .banner-dot.is-active{background:var(--accent);transform:scale(1.25);}
 
@@ -807,19 +803,13 @@ p{margin:0 0 1em;color:var(--secondary);}
 }
 @media (max-width:640px){
   .home-about-inner{grid-template-columns:1fr;padding:26px;}
-  .banner-viewport{min-height:360px;}
-  .banner-arrow{display:none;}
 }
 
 /* reduced motion for the new stuff */
 @media (prefers-reduced-motion: reduce){
   .marquee-track{animation:none;}
   .wheel-avatar,.ring-2{animation:none;}
-  .banner-slide{transition:opacity .3s ease;transform:none;}
-  .banner-slide.is-active .banner-eyebrow,
-  .banner-slide.is-active .banner-title,
-  .banner-slide.is-active .banner-text,
-  .banner-slide.is-active .banner-cta{animation:none;}
+  .banner-track{transition:none;}
 }
 
 /* ============================================================
@@ -912,3 +902,54 @@ p{margin:0 0 1em;color:var(--secondary);}
   box-sizing:border-box;
 }
 .cc-slide .course-card{height:100%;}
+
+/* ============================================================
+   RESPONSIVE BANNER (home page image slider) — banner rules only.
+   Appended last so it overrides earlier banner declarations.
+   ============================================================ */
+
+/* Tablet */
+@media (max-width:992px){
+  .banner-arrow{width:38px;height:38px;font-size:1.3rem;}
+  .banner-prev{left:10px;}
+  .banner-next{right:10px;}
+  .banner-dots{bottom:12px;}
+}
+
+/* Phone — arrows off (swipe instead), bigger dot tap targets.
+   The banner is also allowed a slightly taller crop so the artwork
+   doesn't shrink into an unreadable strip. */
+@media (max-width:640px){
+  .banner-arrow{display:none;}
+  .banner-img{aspect-ratio:16 / 7;object-position:center;}
+  .banner-track{transition:transform .5s var(--ease);}
+  .banner-dots{bottom:10px;gap:14px;}
+  .banner-dot{width:9px;height:9px;position:relative;}
+  .banner-dot::after{content:"";position:absolute;inset:-12px;} /* ~40px touch target */
+}
+
+/* Small phone */
+@media (max-width:480px){
+  .banner-img{aspect-ratio:16 / 8;}
+  .banner-dots{bottom:8px;}
+}
+
+/* Very small phone */
+@media (max-width:360px){
+  .banner-img{aspect-ratio:16 / 9;}
+}
+
+/* If a -mobile artwork is supplied it is already the right shape,
+   so show it whole instead of cropping. */
+@media (max-width:640px){
+  .banner-slide picture source ~ .banner-img{object-fit:cover;}
+}
+
+/* Very wide screens — cap the banner so it doesn't dominate the fold */
+@media (min-width:1800px){
+  .banner-img{max-height:560px;object-fit:cover;}
+}
+
+@media (prefers-reduced-motion: reduce){
+  .banner-track{transition:none;}
+}
