@@ -32,7 +32,7 @@ export default function About() {
       <section className="section" style={{ paddingTop: 20 }}>
         <div className="container">
           <div className="director">
-            <img src="https://res.cloudinary.com/r2fk1fws/image/upload/v1784015326/WhatsApp_Image_2026-07-14_at_12.32.40_PM_dxowt9.jpg" alt="Portrait of the Director" className="director-photo" />
+            <img src="https://res.cloudinary.com/r2fk1fws/image/upload/v1784374657/WhatsApp_Image_2026-07-16_at_5.13.14_PM_mzyxtt.jpg" alt="Portrait of the Director" className="director-photo" />
             <div>
               <div className="eyebrow">Director's Message</div>
               <p className="director-quote">
